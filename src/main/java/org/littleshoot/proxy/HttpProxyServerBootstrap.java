@@ -1,5 +1,6 @@
 package org.littleshoot.proxy;
 
+import org.littleshoot.proxy.impl.ServerGroup;
 import org.littleshoot.proxy.impl.ThreadPoolConfiguration;
 
 import java.net.InetSocketAddress;
@@ -318,4 +319,11 @@ public interface HttpProxyServerBootstrap {
      * @return proxy server bootstrap for chaining
      */
     HttpProxyServerBootstrap withThreadPoolConfiguration(ThreadPoolConfiguration configuration);
+    
+    /**
+     * 
+     * @param group
+     * @return
+     */
+    HttpProxyServerBootstrap withServerGroup(ServerGroup group);
 }

@@ -61,12 +61,6 @@ public class ServerGroup {
     private final int outgoingWorkerThreads;
 
     /**
-     * List of all servers registered to use this ServerGroup. Any access to this list should be synchronized using the
-     * {@link #SERVER_REGISTRATION_LOCK}.
-     */
-    public final List<HttpProxyServer> registeredServers = new ArrayList<HttpProxyServer>(1);
-
-    /**
      * A mapping of {@link TransportProtocol}s to their initialized {@link ProxyThreadPools}. Each transport uses a
      * different thread pool, since the initialization parameters are different.
      */
@@ -154,47 +148,9 @@ public class ServerGroup {
 
         return protocolThreadPools.get(protocol);
     }
-
-    /**
-     * Lock controlling access to the {@link #registerProxyServer(HttpProxyServer)} and {@link #unregisterProxyServer(HttpProxyServer, boolean)}
-     * methods.
-     */
-    private final Object SERVER_REGISTRATION_LOCK = new Object();
-
-    /**
-     * Registers the specified proxy server as a consumer of this server group. The server group will not be shut down
-     * until the proxy unregisters itself.
-     *
-     * @param proxyServer proxy server instance to register
-     */
-    public void registerProxyServer(HttpProxyServer proxyServer) {
-        synchronized (SERVER_REGISTRATION_LOCK) {
-            registeredServers.add(proxyServer);
-        }
-    }
-
-    /**
-     * Unregisters the specified proxy server from this server group. If this was the last registered proxy server, the
-     * server group will be shut down.
-     *
-     * @param proxyServer proxy server instance to unregister
-     * @param graceful when true, the server group shutdown (if necessary) will be graceful
-     */
-    public void unregisterProxyServer(HttpProxyServer proxyServer, boolean graceful) {
-        synchronized (SERVER_REGISTRATION_LOCK) {
-            boolean wasRegistered = registeredServers.remove(proxyServer);
-            if (!wasRegistered) {
-                log.warn("Attempted to unregister proxy server from ServerGroup that it was not registered with. Was the proxy unregistered twice?");
-            }
-
-            if (registeredServers.isEmpty()) {
-                log.debug("Proxy server unregistered from ServerGroup. No proxy servers remain registered, so shutting down ServerGroup.");
-
-                shutdown(graceful);
-            } else {
-                log.debug("Proxy server unregistered from ServerGroup. Not shutting down ServerGroup ({} proxy servers remain registered).", registeredServers.size());
-            }
-        }
+    
+    public void shutdown() {
+        shutdown(false);
     }
 
     /**
