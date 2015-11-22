@@ -15,6 +15,7 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.udt.nio.NioUdtProvider;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
+import io.netty.handler.traffic.TrafficCounter;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.apache.commons.io.IOUtils;
 import org.littleshoot.proxy.ActivityTracker;
@@ -250,7 +251,7 @@ public class DefaultHttpProxyServer implements HttpProxyServer {
         if (writeThrottleBytesPerSecond > 0 || readThrottleBytesPerSecond > 0) {
             this.globalTrafficShapingHandler = createGlobalTrafficShapingHandler(transportProtocol, readThrottleBytesPerSecond, writeThrottleBytesPerSecond);
         } else {
-            this.globalTrafficShapingHandler = null;
+            this.globalTrafficShapingHandler = new GlobalTrafficShapingHandler(this.getProxyToServerWorkerFor(transportProtocol), TRAFFIC_SHAPING_CHECK_INTERVAL_MS);
         }
         this.localAddress = localAddress;
 
@@ -364,6 +365,11 @@ public class DefaultHttpProxyServer implements HttpProxyServer {
     @Override
     public void abort() {
         doStop(false);
+    }
+
+    @Override
+    public TrafficCounter getTrafficCounter() {
+        return globalTrafficShapingHandler.trafficCounter();
     }
 
     /**

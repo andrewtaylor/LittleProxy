@@ -2,6 +2,8 @@ package org.littleshoot.proxy;
 
 import java.net.InetSocketAddress;
 
+import io.netty.handler.traffic.TrafficCounter;
+
 /**
  * Interface for the top-level proxy server class.
  */
@@ -54,4 +56,10 @@ public interface HttpProxyServer {
      * @param writeThrottleBytesPerSecond
      */
     void setThrottle(long readThrottleBytesPerSecond, long writeThrottleBytesPerSecond);
+    
+    /**
+     * Retrieve the traffic counter
+     * @return the counter
+     */
+    TrafficCounter getTrafficCounter();
 }
