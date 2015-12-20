@@ -388,6 +388,10 @@ public class DefaultHttpProxyServer implements HttpProxyServer {
             }
 
             closeAllChannels(graceful);
+            
+            if (globalTrafficShapingHandler != null) {
+                globalTrafficShapingHandler.release();
+            }
 
             LOG.info("Done shutting down proxy server");
         }
